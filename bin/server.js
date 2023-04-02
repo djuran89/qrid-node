@@ -24,14 +24,14 @@ const crosConfig = cors({
 	credentials: true,
 });
 
-// ROUTE
-const mainRoute = require("../routes/index");
-
 // APP CONFIGURATION
 app.use(sessionConfig);
 app.use(crosConfig);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/", mainRoute);
+
+// ROUTE
+const mainRoute = require("../routes/index");
+app.use("/api", mainRoute);
 
 module.exports = app;
