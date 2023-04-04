@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const tokenExpiration = 1111180; // seconds
+const tokenExpiration = 180; // seconds
 const secretKey = process.env.JWT_SECRET_KEY;
 exports.getToken = async (req, res, next) => {
 	try {
