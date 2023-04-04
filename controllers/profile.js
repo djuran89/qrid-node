@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const ProfileModel = require("../models/profile");
 const FormModel = require("../models/form");
+const DeletedToken = require("../models/deletedToken");
 const io = require("../bin/socket");
 const sendEmail = require("../middleware/sendEmail");
 
@@ -13,6 +14,9 @@ exports.get = async (req, res, next) => {
 	try {
 		const authHeader = req.headers["authorization"];
 		const token = authHeader && authHeader.split(" ")[1];
+
+		const findToken = await DeletedToken.findOne({ token });
+		if (findToken) return res.status(400).json(sendMessage("QR Code is expired."));
 
 		jwt.verify(token, secretKey, async (err, data) => {
 			if (err) return res.status(400).json(sendMessage("QR Code is expired."));
