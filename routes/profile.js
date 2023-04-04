@@ -3,7 +3,7 @@ const router = express.Router();
 
 const ctrl = require("../controllers/profile");
 
-// router.get("/", ctrl.get);
+router.get("/", ctrl.get);
 router.get("/login", ctrl.isLogin);
 router.get("/notification", ctrl.notification);
 

@@ -1,11 +1,71 @@
+const jwt = require("jsonwebtoken");
 const ProfileModel = require("../models/profile");
 const FormModel = require("../models/form");
-const sendEmail = require("../middleware/sendEmail");
 const io = require("../bin/socket");
+const sendEmail = require("../middleware/sendEmail");
 
+const secretKey = process.env.JWT_SECRET_KEY;
 const bcrypt = require("bcrypt");
 const saltRounds = 16;
+
 const successMsg = sendMessage("success");
+exports.get = async (req, res, next) => {
+	try {
+		const authHeader = req.headers["authorization"];
+		const token = authHeader && authHeader.split(" ")[1];
+
+		jwt.verify(token, secretKey, async (err, data) => {
+			if (err) return res.status(400).json(sendMessage("QR Code is expired."));
+
+			const findProfile = await ProfileModel.findById(data.userId);
+			const retValData = getProtectedData(findProfile);
+			return res.status(200).json({ ...retValData, exp: data.exp });
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.create = async (req, res, next) => {
+	try {
+		const email = req.session.confirm.email.toLowerCase();
+		const password = req.body.password;
+
+		if (!email) return res.status(400).json(sendMessage("Plase enter email."));
+
+		const findProfile = await ProfileModel.find({ email: { $regex: new RegExp(email, "i") } });
+		if (findProfile.length > 0) return res.status(400).json(sendMessage("Email already exist."));
+
+		const hashPassword = await bcrypt.hash(password, saltRounds);
+		const createProfile = await ProfileModel.create({
+			email,
+			password: hashPassword,
+		});
+
+		const retValProfile = {
+			_id: createProfile._id,
+			email: createProfile.email,
+		};
+
+		req.session.user = retValProfile;
+		res.status(200).json(retValProfile);
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.update = async (req, res, next) => {
+	try {
+		const userId = req.session.user?._id;
+		const editUser = req.body;
+		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+
+		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: editUser }, { new: true });
+		res.status(200).json(getProtectedData(findAndUpdate));
+	} catch (err) {
+		next(err);
+	}
+};
 
 exports.login = async (req, res, next) => {
 	try {
@@ -48,61 +108,6 @@ exports.logout = async (req, res, next) => {
 	try {
 		req.session.destroy();
 		res.status(200).json(sendMessage(`Successfully logged out.`));
-	} catch (err) {
-		next(err);
-	}
-};
-
-exports.get = async (req, res, next) => {
-	try {
-		const _id = req.session.user?._id;
-		if (!_id) return res.status(400).json(sendMessage(`Please login.`));
-
-		const findUser = await ProfileModel.findById(_id);
-		if (!findUser) return res.status(400).json(sendMessage(`Please login.`));
-
-		res.status(200).json(getProtectedData(findUser));
-	} catch (err) {
-		next(err);
-	}
-};
-
-exports.create = async (req, res, next) => {
-	try {
-		const email = req.session.confirm.email.toLowerCase();
-		const password = req.body.password;
-
-		if (!email) return res.status(400).json(sendMessage("Plase enter email."));
-
-		const findProfile = await ProfileModel.find({ email: { $regex: new RegExp(email, "i") } });
-		if (findProfile.length > 0) return res.status(400).json(sendMessage("Email already exist."));
-
-		const hashPassword = await bcrypt.hash(password, saltRounds);
-		const createProfile = await ProfileModel.create({
-			email,
-			password: hashPassword,
-		});
-
-		const retValProfile = {
-			_id: createProfile._id,
-			email: createProfile.email,
-		};
-
-		req.session.user = retValProfile;
-		res.status(200).json(retValProfile);
-	} catch (err) {
-		next(err);
-	}
-};
-
-exports.update = async (req, res, next) => {
-	try {
-		const userId = req.session.user?._id;
-		const editUser = req.body;
-		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
-
-		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: editUser }, { new: true });
-		res.status(200).json(getProtectedData(findAndUpdate));
 	} catch (err) {
 		next(err);
 	}
