@@ -19,12 +19,11 @@ exports.login = async (req, res, next) => {
 		const isValidate = await bcrypt.compare(password, findProfile.password);
 		if (!isValidate) return res.status(404).json(sendMessage(inValidMsg));
 
-		const retValProfile = {
+		req.session.user = {
 			_id: findProfile._id,
 			email: findProfile.email,
 		};
-		req.session.user = retValProfile;
-		res.status(200).json(retValProfile);
+		res.status(200).json(getProtectedData(findProfile));
 	} catch (err) {
 		next(err);
 	}
@@ -37,7 +36,9 @@ exports.isLogin = async (req, res, next) => {
 		if (!_id) return res.status(200).json(null);
 		if (!email) return res.status(200).json(null);
 
-		res.status(200).json({ _id, email });
+		const findUser = await ProfileModel.findById(_id);
+
+		res.status(200).json(getProtectedData(findUser));
 	} catch (err) {
 		next(err);
 	}
@@ -47,6 +48,20 @@ exports.logout = async (req, res, next) => {
 	try {
 		req.session.destroy();
 		res.status(200).json(sendMessage(`Successfully logged out.`));
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.get = async (req, res, next) => {
+	try {
+		const _id = req.session.user?._id;
+		if (!_id) return res.status(400).json(sendMessage(`Please login.`));
+
+		const findUser = await ProfileModel.findById(_id);
+		if (!findUser) return res.status(400).json(sendMessage(`Please login.`));
+
+		res.status(200).json(getProtectedData(findUser));
 	} catch (err) {
 		next(err);
 	}
@@ -75,6 +90,19 @@ exports.create = async (req, res, next) => {
 
 		req.session.user = retValProfile;
 		res.status(200).json(retValProfile);
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.update = async (req, res, next) => {
+	try {
+		const userId = req.session.user?._id;
+		const editUser = req.body;
+		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+
+		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: editUser }, { new: true });
+		res.status(200).json(getProtectedData(findAndUpdate));
 	} catch (err) {
 		next(err);
 	}
@@ -194,4 +222,9 @@ function generateRandomString(length) {
 		counter += 1;
 	}
 	return result;
+}
+
+function getProtectedData(data) {
+	const { password, ...rest } = data._doc;
+	return rest;
 }

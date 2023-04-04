@@ -3,6 +3,7 @@ const router = express.Router();
 
 const ctrl = require("../controllers/profile");
 
+// router.get("/", ctrl.get);
 router.get("/login", ctrl.isLogin);
 router.get("/notification", ctrl.notification);
 
@@ -14,6 +15,7 @@ router.post("/create", ctrl.create);
 router.post("/code/send", ctrl.sendConfirmCode);
 router.post("/code/confirm", ctrl.cofirmCode);
 
+router.put("/", ctrl.update);
 router.put("/notification", ctrl.notifictionRead);
 
 module.exports = router;
