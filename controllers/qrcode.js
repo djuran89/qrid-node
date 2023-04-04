@@ -18,7 +18,6 @@ exports.getToken = async (req, res, next) => {
 exports.checkToken = async (req, res, next) => {
 	try {
 		const token = req.body.token;
-		console.log("Check token");
 
 		const findToken = await DeletedToken.findOne({ token });
 		if (findToken) return res.status(200).json(false);
