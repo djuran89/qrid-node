@@ -25,3 +25,11 @@ yarn-error.log*
 
 log.*
 log
+
+/public
+/data
+/keys
+/keys/*
+/keys/*/*
+/keys/*/*/*
+/*.png

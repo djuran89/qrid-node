@@ -14,6 +14,7 @@ const mongooseSchema = new Schema(
 		state: { type: String },
 		zipcode: { type: String },
 		country: { type: String },
+		dateOfBirth: { type: String },
 	},
 	{ timestamps: true }
 );
