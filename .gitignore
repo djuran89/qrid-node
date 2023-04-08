@@ -34,3 +34,4 @@ log
 /keys/*/*/*
 /*.png
 /unidentified-detections
+https.js
