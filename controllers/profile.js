@@ -80,13 +80,13 @@ exports.uploadFile = async (req, res, next) => {
 		const userId = req.session.user?._id;
 		const image = req.body.image;
 		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
-		const extedion = image.split(";")[0].split("/")[1];
-		const fileName = `${userId}.${extedion}`;
-		const path = `/../next/public/profiles/documents/`;
+		// const extedion = image.split(";")[0].split("/")[1];
+		// const fileName = `${userId}.${extedion}`;
+		// const path = `/../next/public/profiles/documents/`;
 
-		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { document: fileName } }, { new: true });
+		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { document: image } }, { new: true });
 
-		saveBase64Image(image, fileName, path);
+		// saveBase64Image(image, fileName, path);
 
 		res.status(200).json(findAndUpdate);
 	} catch (err) {
