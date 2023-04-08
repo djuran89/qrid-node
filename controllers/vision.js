@@ -7,14 +7,14 @@ const vision = require("@google-cloud/vision");
 
 const appPath = dirname(__dirname);
 
-const googleKeyPath = process.env.VISION_API_KEY_PATH;
-const googleKey = require(`${appPath}/${googleKeyPath}`);
-const fileFaceDetection = `${appPath}/data/faceDetection.json`;
-const fileTextDetection = `${appPath}/data/textDetection.json`;
-const client = new vision.ImageAnnotatorClient({
-	projectId: googleKey.project_id,
-	keyFilename: googleKeyPath,
-});
+// const googleKeyPath = process.env.VISION_API_KEY_PATH;
+// const googleKey = require(`${appPath}/${googleKeyPath}`);
+// const fileFaceDetection = `${appPath}/data/faceDetection.json`;
+// const fileTextDetection = `${appPath}/data/textDetection.json`;
+// const client = new vision.ImageAnnotatorClient({
+// 	projectId: googleKey.project_id,
+// 	keyFilename: googleKeyPath,
+// });
 
 // exports.get = async (req, res, next) => {
 // 	try {
