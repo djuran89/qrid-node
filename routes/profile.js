@@ -11,6 +11,8 @@ router.post("/send", ctrl.send);
 router.post("/login", ctrl.login);
 router.post("/logout", ctrl.logout);
 router.post("/create", ctrl.create);
+router.post("/upload", ctrl.uploadFile);
+router.post("/signature", ctrl.uploadSignature);
 
 router.post("/code/send", ctrl.sendConfirmCode);
 router.post("/code/confirm", ctrl.cofirmCode);

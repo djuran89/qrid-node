@@ -27,7 +27,7 @@ const crosConfig = cors({
 // APP CONFIGURATION
 app.use(sessionConfig);
 app.use(crosConfig);
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: false }));
 
 // ROUTE

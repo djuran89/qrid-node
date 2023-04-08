@@ -1,10 +1,14 @@
+const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const { dirname } = require("path");
+
 const ProfileModel = require("../models/profile");
 const FormModel = require("../models/form");
 const DeletedToken = require("../models/deletedToken");
 const io = require("../bin/socket");
 const sendEmail = require("../middleware/sendEmail");
 
+const appPath = dirname(__dirname);
 const secretKey = process.env.JWT_SECRET_KEY;
 const bcrypt = require("bcrypt");
 const saltRounds = 16;
@@ -66,6 +70,39 @@ exports.update = async (req, res, next) => {
 
 		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: editUser }, { new: true });
 		res.status(200).json(getProtectedData(findAndUpdate));
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.uploadFile = async (req, res, next) => {
+	try {
+		const userId = req.session.user?._id;
+		const image = req.body.image;
+		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+		const extedion = image.split(";")[0].split("/")[1];
+		const fileName = `${userId}.${extedion}`;
+		const path = `/../next/public/profiles/documents/`;
+
+		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { document: fileName } }, { new: true });
+
+		saveBase64Image(image, fileName, path);
+
+		res.status(200).json(findAndUpdate);
+	} catch (err) {
+		next(err);
+	}
+};
+
+exports.uploadSignature = async (req, res, next) => {
+	try {
+		const userId = req.session.user?._id;
+		const { signature } = req.body;
+		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+
+		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { signature } }, { new: true });
+
+		res.status(200).json(findAndUpdate);
 	} catch (err) {
 		next(err);
 	}
@@ -237,3 +274,19 @@ function getProtectedData(data) {
 	const { password, ...rest } = data._doc;
 	return rest;
 }
+
+const saveBase64Image = async (base64, fileName, path) => {
+	try {
+		const dir = appPath + path;
+		if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+
+		const data = base64.replace(/^data:image\/\w+;base64,/, "");
+		const bufferData = Buffer.from(data, "base64");
+
+		fs.writeFileSync(dir + fileName, bufferData);
+
+		return fileName;
+	} catch (err) {
+		console.log(err);
+	}
+};
