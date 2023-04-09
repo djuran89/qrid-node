@@ -64,45 +64,37 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
 	try {
-		const userId = req.session.user?._id;
-		const editUser = req.body;
-		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+		const { user, userId } = req.body;
 
-		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: editUser }, { new: true });
-		res.status(200).json(getProtectedData(findAndUpdate));
+		await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: user }, { new: true });
+
+		res.status(200).json(successMsg);
 	} catch (err) {
 		next(err);
 	}
 };
 
-exports.uploadFile = async (req, res, next) => {
+exports.updateDocument = async (req, res, next) => {
 	try {
-		const userId = req.session.user?._id;
-		const image = req.body.image;
-		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
-		// const extedion = image.split(";")[0].split("/")[1];
-		// const fileName = `${userId}.${extedion}`;
-		// const path = `/../next/public/profiles/documents/`;
+		const { document, userId } = req.body;
+		if (document === undefined) return res.status(400).json(sendMessage("Please enter document."));
 
-		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { document: image } }, { new: true });
+		await ProfileModel.updateOne({ _id: userId }, { $set: { document } });
 
-		// saveBase64Image(image, fileName, path);
-
-		res.status(200).json(findAndUpdate);
+		res.status(200).json(successMsg);
 	} catch (err) {
 		next(err);
 	}
 };
 
-exports.uploadSignature = async (req, res, next) => {
+exports.updateSignature = async (req, res, next) => {
 	try {
-		const userId = req.session.user?._id;
-		const { signature } = req.body;
-		if (!userId) return res.status(400).json(sendMessage(`Please login.`));
+		const { signature, userId } = req.body;
+		if (signature === undefined) return res.status(400).json(sendMessage("Please enter signature."));
 
-		const findAndUpdate = await ProfileModel.findOneAndUpdate({ _id: userId }, { $set: { signature } }, { new: true });
+		await ProfileModel.updateOne({ _id: userId }, { $set: { signature } });
 
-		res.status(200).json(findAndUpdate);
+		res.status(200).json(successMsg);
 	} catch (err) {
 		next(err);
 	}
