@@ -15,16 +15,16 @@ exports.getToken = async (req, res, next) => {
 	}
 };
 
-exports.checkToken = async (req, res, next) => {
+exports.isTokenExpire = async (req, res, next) => {
 	try {
 		const token = req.body.token;
 
 		const findToken = await DeletedToken.findOne({ token });
-		if (findToken) return res.status(200).json(false);
+		if (findToken) return res.status(200).json(true);
 
 		jwt.verify(token, secretKey, async (err, data) => {
-			if (err) return res.status(200).json(false);
-			return res.status(200).json(true);
+			if (err) return res.status(200).json(true);
+			return res.status(200).json(false);
 		});
 	} catch (err) {
 		next(err);

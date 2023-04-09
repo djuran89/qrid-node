@@ -5,7 +5,7 @@ const ctrl = require("../controllers/qrcode");
 
 router.get("/token", ctrl.getToken);
 
-router.post("/token", ctrl.checkToken);
+router.post("/token/expire", ctrl.isTokenExpire);
 
 router.delete("/token", ctrl.deleteToken);
 
